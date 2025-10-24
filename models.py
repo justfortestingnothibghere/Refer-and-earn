@@ -1,8 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
+from app import db  # Import db from app.py
 
-# db is imported from app.py, not defined here
 # Models only, no db initialization
 class User(UserMixin):
     __tablename__ = 'user'
