@@ -1,6 +1,73 @@
-body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 20px; }
-h1 { color: #333; }
-nav a { margin-right: 10px; color: #007bff; text-decoration: none; }
-form { margin: 20px 0; }
-input, button { padding: 10px; margin: 5px; }
-.cell { width: 50px; height: 50px; border: 1px solid #000; display: inline-block; text-align: center; }  /* For Tic Tac Toe */
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: #333;
+    margin: 20px;
+    text-align: center;
+}
+h1, h2, h3 {
+    color: #222;
+}
+nav a {
+    margin: 0 10px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+form {
+    margin: 20px 0;
+}
+input, textarea, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+button {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #e55a5a;
+}
+.cell {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #333;
+    display: inline-block;
+    line-height: 60px;
+    font-size: 24px;
+    margin: 2px;
+    background: white;
+}
+#board {
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    justify-content: center;
+}
+#wheel {
+    width: 100px;
+    height: 100px;
+    background: #ccc;
+    border-radius: 50%;
+    line-height: 100px;
+    margin: 20px auto;
+}
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #333;
+    padding: 10px;
+}
+#chat {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+}
