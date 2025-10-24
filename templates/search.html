@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Users - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Search Users</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <form method="get">
+        <input type="text" name="q" placeholder="Search by UserID">
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for user in users %}
+            <li><a href="{{ url_for('profile', userid=user.userid) }}">{{ user.username }} ({{ user.userid }})</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
