@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with {{ to_user.username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Chat with {{ to_user.username }}</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <div id="chat" style="height: 300px; overflow-y: scroll;">
+        {% for c in chats %}
+            <p>{{ c.from_userid }}: {{ c.message }} {% if c.media_url %}<a href="{{ c.media_url }}">View Media</a>{% endif %}</p>
+        {% endfor %}
+    </div>
+    <input type="text" id="message" placeholder="Type a message">
+    <input type="file" id="media">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="uploadMedia()">Upload Media</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <script>
+        const currentUserId = '{{ current_user.userid }}';
+        const toUserId = '{{ to_user.userid }}';
+    </script>
+</body>
+</html>
