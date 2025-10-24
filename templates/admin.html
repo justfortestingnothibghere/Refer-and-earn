@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .section { margin: 20px; padding: 20px; background: white; border-radius: 10px; }
+        .section h2 { color: #ff6b6b; }
+        table { width: 100%; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; }
+        .action-btn { background: #e55a5a; color: white; padding: 5px 10px; }
+        .logs { max-height: 300px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+    <h1>Secret Admin Panel</h1>
+    <nav>
+        <a href="{{ url_for('index') }}">Home</a> | 
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Users Management -->
+    <div class="section">
+        <h2>Manage Users</h2>
+        <table>
+            <tr>
+                <th>UserID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Balance</th>
+                <th>Level</th>
+                <th>VIP</th>
+                <th>Banned</th>
+                <th>Actions</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.userid }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="edit_balance">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="number" name="balance" value="{{ user.balance }}" style="width: 80px;">
+                        <button type="submit" class="action-btn">Update</button>
+                    </form>
+                </td>
+                <td>{{ user.level }}</td>
+                <td>{{ 'Yes' if user.vip else 'No' }}</td>
+                <td>{{ 'Yes' if user.banned else 'No' }}</td>
+                <td>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="{{ 'unban' if user.banned else 'ban' }}">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <button type="submit" class="action-btn">{{ 'Unban' if user.banned else 'Ban' }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Transactions Management -->
+    <div class="section">
+        <h2>Transactions (Virtual)</h2>
+        <table>
+            <tr>
+                <th>UserID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Fee</th>
+                <th>Status</th>
+                <th>UTR</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+            </tr>
+            {% for trans in transactions %}
+            <tr>
+                <td>{{ User.query.get(trans.user_id).userid }}</td>
+                <td>{{ trans.type }}</td>
+                <td>{{ trans.amount }}</td>
+                <td>{{ trans.fee }}</td>
+                <td>{{ trans.status }}</td>
+                <td>{{ trans.utr or 'N/A' }}</td>
+                <td>{{ trans.timestamp }}</td>
+                <td>
+                    {% if trans.status == 'pending' %}
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="approve_trans">
+                        <input type="hidden" name="trans_id" value="{{ trans.id }}">
+                        <button type="submit" class="action-btn">Approve</button>
+                    </form>
+                    <form method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="reject_trans">
+                        <input type="hidden" name="trans_id" value="{{ trans.id }}">
+                        <button type="submit" class="action-btn">Reject</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Chat Monitoring -->
+    <div class="section">
+        <h2>Chat Logs</h2>
+        <div class="logs">
+            <table>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Message</th>
+                    <th>Media</th>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                </tr>
+                {% for chat in chats %}
+                <tr>
+                    <td>{{ chat.from_userid }}</td>
+                    <td>{{ chat.to_userid }}</td>
+                    <td>{{ chat.message }}</td>
+                    <td>{% if chat.media_url %}<a href="{{ chat.media_url }}" target="_blank">View</a>{% else %}None{% endif %}</td>
+                    <td>{{ chat.timestamp }}</td>
+                    <td>
+                        <form method="post">
+                            <input type="hidden" name="action" value="delete_chat">
+                            <input type="hidden" name="chat_id" value="{{ chat.id }}">
+                            <button type="submit" class="action-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <!-- Game Logs -->
+    <div class="section">
+        <h2>Game Logs</h2>
+        <div class="logs">
+            <table>
+                <tr>
+                    <th>UserID</th>
+                    <th>Game</th>
+                    <th>Win</th>
+                    <th>Amount</th>
+                    <th>Timestamp</th>
+                </tr>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ User.query.get(log.user_id).userid }}</td>
+                    <td>{{ log.game_type }}</td>
+                    <td>{{ 'Yes' if log.win else 'No' }}</td>
+                    <td>{{ log.amount }}</td>
+                    <td>{{ log.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <!-- Site Settings -->
+    <div class="section">
+        <h2>Site Settings</h2>
+        <form method="post">
+            <input type="hidden" name="action" value="set_win_rate">
+            <label>Spin Win Rate (%):</label>
+            <input type="number" name="spin_win_rate" value="50" min="0" max="100">
+            <button type="submit" class="action-btn">Update</button>
+        </form>
+        <form method="post">
+            <input type="hidden" name="action" value="maintenance_mode">
+            <label>Maintenance Mode:</label>
+            <input type="checkbox" name="maintenance" {% if maintenance_mode %}checked{% endif %}>
+            <button type="submit" class="action-btn">Toggle</button>
+        </form>
+    </div>
+
+    <!-- Site Stats -->
+    <div class="section">
+        <h2>Site Stats</h2>
+        <p>Total Users: {{ users|length }}</p>
+        <p>Total Games Played: {{ logs|length }}</p>
+        <p>Total Transactions: {{ transactions|length }}</p>
+        <p>Total Chats: {{ chats|length }}</p>
+    </div>
+</body>
+  </html>
