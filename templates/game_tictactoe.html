@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tic Tac Toe - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Tic Tac Toe vs AI</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <div id="board">
+        {% for i in range(9) %}
+            <div class="cell" onclick="playerMove({{ i }})"></div>
+        {% endfor %}
+    </div>
+    <p>Balance: {{ current_user.balance }} coins</p>
+    <script src="{{ url_for('static', filename='js/games.js') }}"></script>
+</body>
+</html>
