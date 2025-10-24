@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Leaderboard</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <table>
+        <tr><th>Rank</th><th>User</th><th>EXP</th><th>Level</th></tr>
+        {% for i, user in top_users|enumerate %}
+            <tr>
+                <td>{{ i + 1 }}</td>
+                <td><a href="{{ url_for('profile', userid=user.userid) }}">{{ user.username }}</a></td>
+                <td>{{ user.exp }}</td>
+                <td>{{ user.level }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
