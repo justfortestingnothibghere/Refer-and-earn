@@ -2,7 +2,7 @@ from flask_login import UserMixin
 from datetime import datetime
 from app import db  # Import db from app.py
 
-# Define User first to ensure table exists for foreign keys
+# User model (defined first to ensure table exists before foreign keys)
 class User(UserMixin):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -21,8 +21,9 @@ class User(UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     banned = db.Column(db.Boolean, default=False)
     last_login = db.Column(db.DateTime, default=datetime.now)
-    referrals = db.relationship('Referral', backref='referrer')
+    referrals = db.relationship('Referral', backref='referrer', lazy='dynamic')
 
+# Other models (after User to avoid reference issues)
 class Chat(db.Model):
     __tablename__ = 'chat'
     id = db.Column(db.Integer, primary_key=True)
@@ -35,7 +36,7 @@ class Chat(db.Model):
 class Transaction(db.Model):
     __tablename__ = 'transaction'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Reference 'user' table
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_transaction_user_id'))  # Explicit name for FK
     type = db.Column(db.String(10))
     amount = db.Column(db.Float)
     utr = db.Column(db.String(50))
@@ -46,13 +47,13 @@ class Transaction(db.Model):
 class Referral(db.Model):
     __tablename__ = 'referral'
     id = db.Column(db.Integer, primary_key=True)
-    referrer_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Reference 'user' table
+    referrer_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_referral_referrer_id'))
     invited_userid = db.Column(db.String(20))
 
 class Notification(db.Model):
     __tablename__ = 'notification'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Reference 'user' table
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_notification_user_id'))
     message = db.Column(db.Text)
     read = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.now)
@@ -60,7 +61,7 @@ class Notification(db.Model):
 class GameLog(db.Model):
     __tablename__ = 'game_log'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Reference 'user' table
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_game_log_user_id'))
     game_type = db.Column(db.String(50))
     win = db.Column(db.Boolean)
     amount = db.Column(db.Float)
