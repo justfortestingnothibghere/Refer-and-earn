@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Welcome, {% if user %}{{ user.username }}{% else %}Guest{% endif %}!</h1>
+    <nav>
+        <a href="/game/tictactoe">Tic Tac Toe</a> |
+        <a href="/game/spin">Spin and Win</a> |
+        <a href="/game/rps">Rock Paper Scissors</a> |
+        <a href="/game/coinflip">Coin Flip</a> |
+        <a href="/game/numberguess">Number Guess</a> |
+        <a href="/leaderboard">Leaderboard</a> |
+        <a href="/shop">Shop</a> |
+        <a href="/settings">Settings</a> |
+        {% if user %}<a href="/logout">Logout</a>{% else %}<a href="/login">Login</a> | <a href="/signup">Signup</a>{% endif %}
+    </nav>
+    <p>Your Balance: {{ user.balance if user else 0 }} coins</p>
+    <p>Refer Link: https://yourdomain.com/refer?id={{ user.userid if user }}</p>
+</body>
+</html>
