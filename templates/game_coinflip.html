@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Coin Flip - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Coin Flip</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <button onclick="flipCoin('heads')">Heads</button>
+    <button onclick="flipCoin('tails')">Tails</button>
+    <div id="result"></div>
+    <p>Balance: {{ current_user.balance }} coins</p>
+    <script src="{{ url_for('static', filename='js/games.js') }}"></script>
+    <script>
+        function flipCoin(choice) {
+            const result = Math.random() > 0.5 ? 'heads' : 'tails';
+            let win = choice === result;
+            fetch('/game/win', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({game: 'coinflip', win})
+            }).then(res => res.json()).then(data => {
+                document.getElementById('result').innerText = `Result: ${result}. ${win ? 'Win' : 'Lose'}! Balance: ${data.balance}`;
+            });
+        }
+    </script>
+</body>
+</html>
