@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile - {{ profile_user.username }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>{{ profile_user.username }}'s Profile</h1>
+    <nav>
+        <a href="{{ url_for('index') }}">Home</a> | <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
+    {% if profile_user.profile_dp %}
+        <img src="{{ url_for('static', filename='uploads/' + profile_user.profile_dp) }}" alt="Profile Picture" width="100">
+    {% endif %}
+    <p>UserID: {{ profile_user.userid }}</p>
+    <p>Bio: {{ profile_user.bio or 'No bio' }}</p>
+    <p>Balance: {{ profile_user.balance }} coins</p>
+    <p>Level: {{ profile_user.level }} (EXP: {{ profile_user.exp }})</p>
+    <p>VIP: {{ 'Yes' if profile_user.vip else 'No' }}</p>
+    {% if not profile_user.hide_phone %}
+        <p>Phone: {{ profile_user.phone or 'Not set' }}</p>
+    {% endif %}
+    <a href="{{ url_for('chat', to_userid=profile_user.userid) }}">Chat</a>
+    <h2>Deposit (Virtual)</h2>
+    <form method="post" action="{{ url_for('deposit') }}">
+        <input type="number" name="amount" placeholder="Amount (20-1000)" required>
+        <button type="submit">Deposit</button>
+    </form>
+    <h2>Withdraw (Virtual)</h2>
+    <form method="post" action="{{ url_for('withdraw') }}">
+        <input type="number" name="amount" placeholder="Amount" required>
+        <button type="submit">Withdraw</button>
+    </form>
+</body>
+</html>
