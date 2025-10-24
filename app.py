@@ -10,10 +10,8 @@ from datetime import datetime, timedelta
 import requests
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'fallback_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
@@ -21,23 +19,18 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'txt'}
 
-# Initialize SQLAlchemy
-db = SQLAlchemy()  # Create db instance
-db.init_app(app)  # Bind to app
+db = SQLAlchemy()
+db.init_app(app)
 
-# Initialize Flask-Login and SocketIO
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Create uploads folder
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Import models after db initialization
 from models import User, Chat, Transaction, Referral, Notification, GameLog
 
-# Initialize DB and create admin
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
@@ -61,7 +54,6 @@ def load_user(user_id):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# Unsplash API
 @app.route('/api/image/<category>')
 def get_unsplash_image(category='gaming'):
     access_key = os.getenv('UNSPLASH_ACCESS_KEY')
@@ -74,7 +66,6 @@ def get_unsplash_image(category='gaming'):
         return jsonify({'url': data['urls']['regular'], 'alt': data['alt_description']})
     return jsonify({'error': 'Image fetch failed'}), 500
 
-# Routes
 @app.route('/')
 def index():
     image = requests.get(f'http://{request.host}/api/image/gaming').json() if os.getenv('UNSPLASH_ACCESS_KEY') else {'url': 'https://via.placeholder.com/800x400?text=Gaming+Hero'}
