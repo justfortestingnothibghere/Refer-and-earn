@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Shop</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <p>Balance: {{ current_user.balance }} coins</p>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post">
+        <h3>Buy VIP (500 coins)</h3>
+        <input type="hidden" name="item" value="vip">
+        <button type="submit">Buy</button>
+    </form>
+    <!-- Add more items like avatars -->
+</body>
+</html>
