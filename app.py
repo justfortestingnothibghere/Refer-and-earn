@@ -31,6 +31,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 from models import User, Chat, Transaction, Referral, Notification, GameLog
 
+# ✅ Fix: create default admin without flash()
 with app.app_context():
     db.create_all()
     if not User.query.filter_by(username='admin').first():
@@ -45,7 +46,7 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
-        flash('Default admin created: admin/adminpass', 'info')
+        print("✅ Default admin created: username=admin, password=adminpass")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -82,11 +83,11 @@ def login():
                 flash('Account banned. Contact admin.', 'error')
                 return render_template('login.html')
             login_user(user)
-            user.last_login = datetime.now()
             if user.last_login < datetime.now() - timedelta(days=1):
                 user.balance += 50
                 send_notification(user.id, 'Daily login bonus: +50 coins!')
                 flash('Daily login bonus: +50 coins!', 'success')
+            user.last_login = datetime.now()
             db.session.commit()
             return redirect(url_for('index'))
         flash('Invalid credentials', 'error')
@@ -340,14 +341,12 @@ def admin():
 
 @socketio.on('join')
 def on_join(data):
-    room = sorted([data['from'], data['to']])
-    room = '-'.join(room)
+    room = '-'.join(sorted([data['from'], data['to']]))
     join_room(room)
 
 @socketio.on('send_message')
 def handle_message(data):
-    room = sorted([data['from'], data['to']])
-    room = '-'.join(room)
+    room = '-'.join(sorted([data['from'], data['to']]))
     msg = Chat(from_userid=data['from'], to_userid=data['to'], message=data.get('text'), media_url=data.get('media'))
     banned_words = ['porn', 'illegal']
     if any(word in (msg.message or '').lower() for word in banned_words):
@@ -362,4 +361,6 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    with app.app_context():
+        db.create_all()
+    socketio.run(app, host='0.0.0.0', port=int(os.getenv('PORT', 10000)), debug=True)
