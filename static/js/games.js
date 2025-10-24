@@ -1,10 +1,9 @@
-// Tic Tac Toe vs AI
+// Tic Tac Toe
 let board = Array(9).fill(null);
 let player = 'X';
 let ai = 'O';
 
 function renderBoard() {
-    // Update DOM with board
     document.querySelectorAll('.cell').forEach((cell, i) => {
         cell.textContent = board[i];
     });
@@ -68,22 +67,24 @@ function playerMove(index) {
             body: JSON.stringify({game: 'tictactoe', win: winner === player})
         }).then(res => res.json()).then(data => {
             alert(`You ${winner === player ? 'Win' : 'Lose'}! Balance: ${data.balance}`);
+            board = Array(9).fill(null);
+            renderBoard();
         });
     }
 }
 
-// Similar functions for other games: Spin (random wheel), RPS (random choice), CoinFlip (random), NumberGuess (random number 1-100)
-
-// Example for Spin
+// Spin and Win
 function spinWheel() {
-    let prize = Math.random() > 0.5 ? 20 : -10;  // Admin can adjust probability
-    fetch('/game/win', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({game: 'spin', win: prize > 0})
-    }).then(res => res.json()).then(data => {
-        alert(`You won ${prize} coins! New Balance: ${data.balance}`);
-    });
+    document.getElementById('wheel').innerText = 'Spinning...';
+    setTimeout(() => {
+        let prize = Math.random() > 0.5 ? 20 : -10;
+        fetch('/game/win', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({game: 'spin', win: prize > 0})
+        }).then(res => res.json()).then(data => {
+            document.getElementById('wheel').innerText = 'Spin Again!';
+            alert(`You won ${prize} coins! New Balance: ${data.balance}`);
+        });
+    }, 1000);
 }
-
-// Attach to buttons in HTML
