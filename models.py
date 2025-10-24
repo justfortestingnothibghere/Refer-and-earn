@@ -1,9 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin  # Yeh line add karo
 from datetime import datetime
 
 db = SQLAlchemy()
 
-class User(db.Model, UserMixin):
+class User(db.Model, UserMixin):  # UserMixin yahan inherit hota hai
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(20), unique=True)
     username = db.Column(db.String(50), unique=True)
