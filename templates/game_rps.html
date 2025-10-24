@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rock Paper Scissors - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Rock Paper Scissors vs AI</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    <button onclick="playRPS('rock')">Rock</button>
+    <button onclick="playRPS('paper')">Paper</button>
+    <button onclick="playRPS('scissors')">Scissors</button>
+    <div id="result"></div>
+    <p>Balance: {{ current_user.balance }} coins</p>
+    <script src="{{ url_for('static', filename='js/games.js') }}"></script>
+    <script>
+        function playRPS(choice) {
+            const aiChoice = ['rock', 'paper', 'scissors'][Math.floor(Math.random() * 3)];
+            let win = (choice === 'rock' && aiChoice === 'scissors') ||
+                      (choice === 'paper' && aiChoice === 'rock') ||
+                      (choice === 'scissors' && aiChoice === 'paper');
+            fetch('/game/win', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({game: 'rps', win})
+            }).then(res => res.json()).then(data => {
+                document.getElementById('result').innerText = `You chose ${choice}, AI chose ${aiChoice}. ${win ? 'Win' : 'Lose'}! Balance: ${data.balance}`;
+            });
+        }
+    </script>
+</body>
+</html>
