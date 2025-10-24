@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="vanta-bg"></div>
+    <div class="container">
+        <h1>Notifications</h1>
+        <nav><a href="{{ url_for('index') }}">Home</a></nav>
+        <ul>
+            {% for n in notifications %}
+                <li class="notif {% if not n.read %}unread{% endif %}">{{ n.message }} - {{ n.timestamp.strftime('%Y-%m-%d %H:%M') }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Same Vanta script as above -->
+</body>
+</html>
