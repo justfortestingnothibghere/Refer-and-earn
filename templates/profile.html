@@ -4,33 +4,83 @@
     <meta charset="UTF-8">
     <title>Profile - {{ profile_user.username }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  <!-- Alerts -->
 </head>
 <body>
-    <h1>{{ profile_user.username }}'s Profile</h1>
-    <nav>
-        <a href="{{ url_for('index') }}">Home</a> | <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
-    {% if profile_user.profile_dp %}
-        <img src="{{ url_for('static', filename='uploads/' + profile_user.profile_dp) }}" alt="Profile Picture" width="100">
-    {% endif %}
-    <p>UserID: {{ profile_user.userid }}</p>
-    <p>Bio: {{ profile_user.bio or 'No bio' }}</p>
-    <p>Balance: {{ profile_user.balance }} coins</p>
-    <p>Level: {{ profile_user.level }} (EXP: {{ profile_user.exp }})</p>
-    <p>VIP: {{ 'Yes' if profile_user.vip else 'No' }}</p>
-    {% if not profile_user.hide_phone %}
-        <p>Phone: {{ profile_user.phone or 'Not set' }}</p>
-    {% endif %}
-    <a href="{{ url_for('chat', to_userid=profile_user.userid) }}">Chat</a>
-    <h2>Deposit (Virtual)</h2>
-    <form method="post" action="{{ url_for('deposit') }}">
-        <input type="number" name="amount" placeholder="Amount (20-1000)" required>
-        <button type="submit">Deposit</button>
-    </form>
-    <h2>Withdraw (Virtual)</h2>
-    <form method="post" action="{{ url_for('withdraw') }}">
-        <input type="number" name="amount" placeholder="Amount" required>
-        <button type="submit">Withdraw</button>
-    </form>
+    <div id="vanta-bg"></div>  <!-- 3D Background -->
+    <div class="container">
+        <h1>{{ profile_user.username }}'s Profile</h1>
+        <nav><a href="{{ url_for('index') }}">Home</a> | <a href="{{ url_for('notifications') }}">Notifications ({{ notifications|length }})</a> | <a href="{{ url_for('logout') }}">Logout</a></nav>
+        {% if profile_user.profile_dp %}
+            <img src="{{ url_for('static', filename='uploads/' + profile_user.profile_dp) }}" alt="DP" class="profile-img">
+        {% endif %}
+        <p>UserID: {{ profile_user.userid }}</p>
+        <p>Bio: {{ profile_user.bio or 'No bio' }}</p>
+        <p>Balance: ₹{{ profile_user.balance }} coins</p>
+        <p>Level: {{ profile_user.level }} (EXP: {{ profile_user.exp }}) | VIP: {{ 'Yes' if profile_user.vip else 'No' }}</p>
+        {% if not profile_user.hide_phone %}<p>Phone: {{ profile_user.phone }}</p>{% endif %}
+        <a href="{{ url_for('chat', to_userid=profile_user.userid) }}" class="btn">Chat</a>
+
+        <h2>Transactions</h2>
+        <table>
+            <tr><th>Type</th><th>Amount</th><th>Fee</th><th>Status</th><th>Date</th></tr>
+            {% for t in transactions %}
+                <tr class="{% if t.status == 'pending' %}warning{% endif %}">
+                    <td>{{ t.type.title() }}</td>
+                    <td>₹{{ t.amount }}</td>
+                    <td>₹{{ t.fee }}</td>
+                    <td>{{ t.status }}</td>
+                    <td>{{ t.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Deposit</h2>
+        <form method="post" action="{{ url_for('deposit') }}" class="form">
+            <input type="number" name="amount" placeholder="Amount (20-1000)" required min="20" max="1000">
+            <input type="text" name="utr" placeholder="UTR/TXN ID" required>
+            <button type="submit" class="btn sound-btn">Deposit (10% Fee, >500 +15% Bonus)</button>
+        </form>
+
+        <h2>Withdraw (20% Fee, 2/day, No Cancel)</h2>
+        <form method="post" action="{{ url_for('withdraw') }}" class="form">
+            <input type="number" name="amount" placeholder="Amount" required>
+            <button type="submit" class="btn sound-btn">Withdraw Request</button>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>  <!-- 3D Waves -->
+    <script>
+        VANTA.WAVES({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 100.00,
+            minWidth: 100.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x2e5fff,
+            shininess: 30.00,
+            waveHeight: 15.00,
+            waveSpeed: 0.65,
+            zoom: 0.65
+        });
+        // SweetAlert for flashes
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    Swal.fire('{{ category.title() }}', '{{ message }}', '{{ category }}');
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        // Button sounds
+        document.querySelectorAll('.sound-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+Dyvmwh');  // Free beep base64
+                audio.play();
+            });
+        });
+    </script>
 </body>
 </html>
