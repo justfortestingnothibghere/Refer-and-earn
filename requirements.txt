@@ -6,3 +6,5 @@ werkzeug
 eventlet
 pillow
 itsdangerous
+gunicorn
+python-dotenv
