@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - TeamXOg Games</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Settings</h1>
+    <nav><a href="{{ url_for('index') }}">Home</a></nav>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data">
+        <textarea name="bio" placeholder="Bio">{{ current_user.bio or '' }}</textarea>
+        <input type="checkbox" name="hide_phone" {% if current_user.hide_phone %}checked{% endif %}> Hide Phone
+        <input type="file" name="dp" accept="image/*">
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>
