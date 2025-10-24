@@ -8,3 +8,4 @@ pillow
 itsdangerous
 gunicorn
 python-dotenv
+requests
