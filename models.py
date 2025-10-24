@@ -1,10 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin  # Yeh line add karo
+from flask_login import UserMixin
 from datetime import datetime
 
-db = SQLAlchemy()
-
-class User(db.Model, UserMixin):  # UserMixin yahan inherit hota hai
+# db is imported from app.py, not defined here
+# Models only, no db initialization
+class User(UserMixin):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(20), unique=True)
     username = db.Column(db.String(50), unique=True)
@@ -34,7 +35,7 @@ class Chat(db.Model):
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    type = db.Column(db.String(10))  # deposit/withdraw
+    type = db.Column(db.String(10))
     amount = db.Column(db.Float)
     utr = db.Column(db.String(50))
     status = db.Column(db.String(20), default='pending')
