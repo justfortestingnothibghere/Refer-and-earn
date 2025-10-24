@@ -22,18 +22,19 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'mp4', 'txt'}
 
 # Initialize SQLAlchemy
-db = SQLAlchemy(app)  # Define db here
+db = SQLAlchemy()  # Create db instance
+db.init_app(app)  # Bind to app
 
 # Initialize Flask-Login and SocketIO
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Create uploads folder if not exists
+# Create uploads folder
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Now import models after db is defined
+# Import models after db initialization
 from models import User, Chat, Transaction, Referral, Notification, GameLog
 
 # Initialize DB and create admin
@@ -60,7 +61,7 @@ def load_user(user_id):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# Unsplash API for gaming images
+# Unsplash API
 @app.route('/api/image/<category>')
 def get_unsplash_image(category='gaming'):
     access_key = os.getenv('UNSPLASH_ACCESS_KEY')
@@ -73,13 +74,12 @@ def get_unsplash_image(category='gaming'):
         return jsonify({'url': data['urls']['regular'], 'alt': data['alt_description']})
     return jsonify({'error': 'Image fetch failed'}), 500
 
-# Home
+# Routes
 @app.route('/')
 def index():
     image = requests.get(f'http://{request.host}/api/image/gaming').json() if os.getenv('UNSPLASH_ACCESS_KEY') else {'url': 'https://via.placeholder.com/800x400?text=Gaming+Hero'}
     return render_template('index.html', user=current_user if current_user.is_authenticated else None, hero_image=image)
 
-# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -101,7 +101,6 @@ def login():
         flash('Invalid credentials', 'error')
     return render_template('login.html')
 
-# Signup
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -135,7 +134,6 @@ def signup():
         return redirect(url_for('index'))
     return render_template('signup.html')
 
-# Logout
 @app.route('/logout')
 @login_required
 def logout():
@@ -143,7 +141,6 @@ def logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('index'))
 
-# Profile
 @app.route('/profile/<userid>')
 @login_required
 def profile(userid):
@@ -152,7 +149,6 @@ def profile(userid):
     notifications = Notification.query.filter_by(user_id=user.id, read=False).all()
     return render_template('profile.html', profile_user=user, transactions=transactions, notifications=notifications)
 
-# Settings
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -169,7 +165,6 @@ def settings():
         flash('Profile updated', 'success')
     return render_template('settings.html')
 
-# Search
 @app.route('/search')
 @login_required
 def search():
@@ -177,7 +172,6 @@ def search():
     users = User.query.filter(User.userid.like(f'%{query}%')).all()
     return render_template('search.html', users=users)
 
-# Chat
 @app.route('/chat/<to_userid>')
 @login_required
 def chat(to_userid):
@@ -186,7 +180,6 @@ def chat(to_userid):
                               ((Chat.from_userid == to_userid) & (Chat.to_userid == current_user.userid))).order_by(Chat.timestamp).all()
     return render_template('chat.html', to_user=to_user, chats=chats)
 
-# Upload
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload():
@@ -199,13 +192,11 @@ def upload():
         return jsonify({'url': f'/static/uploads/{filename}'})
     return jsonify({'error': 'Invalid file'}), 400
 
-# Leaderboard
 @app.route('/leaderboard')
 def leaderboard():
     top_users = User.query.order_by(User.exp.desc()).limit(10).all()
     return render_template('leaderboard.html', top_users=top_users)
 
-# Shop
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def shop():
@@ -220,7 +211,6 @@ def shop():
             flash('Insufficient balance', 'error')
     return render_template('shop.html')
 
-# Game routes
 @app.route('/game/tictactoe')
 @login_required
 def game_tictactoe():
@@ -246,7 +236,6 @@ def game_coinflip():
 def game_numberguess():
     return render_template('game_numberguess.html')
 
-# Game win API
 @app.route('/game/win', methods=['POST'])
 @login_required
 def game_win():
@@ -264,7 +253,6 @@ def game_win():
     db.session.commit()
     return jsonify({'balance': current_user.balance, 'exp': current_user.exp, 'level': current_user.level})
 
-# Deposit
 @app.route('/deposit', methods=['POST'])
 @login_required
 def deposit():
@@ -284,7 +272,6 @@ def deposit():
         flash('Invalid amount: Min 20, Max 1000', 'error')
     return redirect(url_for('profile', userid=current_user.userid))
 
-# Withdraw
 @app.route('/withdraw', methods=['POST'])
 @login_required
 def withdraw():
@@ -303,7 +290,6 @@ def withdraw():
         flash('Insufficient balance or daily limit (2/day) exceeded', 'error')
     return redirect(url_for('profile', userid=current_user.userid))
 
-# Notifications
 @app.route('/notifications')
 @login_required
 def notifications():
@@ -318,7 +304,6 @@ def send_notification(user_id, msg):
     db.session.add(notif)
     db.session.commit()
 
-# Admin
 @app.route('/s/s/secret/1/000/admin/ap', methods=['GET', 'POST'])
 @login_required
 def admin():
@@ -362,7 +347,6 @@ def admin():
             flash('Chat deleted', 'success')
     return render_template('admin.html', users=users, transactions=transactions, chats=chats, logs=logs)
 
-# SocketIO
 @socketio.on('join')
 def on_join(data):
     room = sorted([data['from'], data['to']])
@@ -382,7 +366,6 @@ def handle_message(data):
     db.session.commit()
     emit('new_message', {'from': msg.from_userid, 'text': msg.message, 'media': msg.media_url}, room=room)
 
-# Serve uploads
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
